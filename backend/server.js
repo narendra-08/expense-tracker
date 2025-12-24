@@ -4,10 +4,15 @@ import cors from "cors";
 const app = express();
 
 /* ===============================
-   MIDDLEWARE
+   MIDDLEWARES
 ================================ */
 app.use(cors());
 app.use(express.json());
+
+/* ===============================
+   PORT (IMPORTANT FOR RENDER)
+================================ */
+const PORT = process.env.PORT || 5000;
 
 /* ===============================
    TEMP DATABASE (IN-MEMORY)
@@ -16,17 +21,27 @@ let users = [];
 let transactions = [];
 
 /* ===============================
-   ROOT CHECK (IMPORTANT)
+   ROOT ROUTE (RENDER CHECK)
 ================================ */
 app.get("/", (req, res) => {
   res.send("Expense Tracker Backend is running 🚀");
 });
 
 /* ===============================
+   DEBUG ROUTE (DEPLOY CHECK)
+================================ */
+app.get("/api/debug", (req, res) => {
+  res.json({
+    status: "API routes loaded successfully",
+    time: new Date().toISOString()
+  });
+});
+
+/* ===============================
    HEALTH CHECK
 ================================ */
 app.get("/api/health", (req, res) => {
-  res.json({ status: "Backend running" });
+  res.json({ status: "Backend running healthy ✅" });
 });
 
 /* ===============================
@@ -90,10 +105,18 @@ app.delete("/api/transactions/:id", (req, res) => {
 });
 
 /* ===============================
-   PORT FIX (MOST IMPORTANT)
+   404 HANDLER (LAST)
 ================================ */
-const PORT = process.env.PORT || 5000;
+app.use((req, res) => {
+  res.status(404).json({
+    error: "Route not found",
+    path: req.originalUrl
+  });
+});
 
-app.listen(PORT, "0.0.0.0", () => {
+/* ===============================
+   START SERVER
+================================ */
+app.listen(PORT, () => {
   console.log(`Backend running on port ${PORT}`);
 });
