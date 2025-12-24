@@ -2,13 +2,12 @@ import express from "express";
 import cors from "cors";
 
 const app = express();
-app.use(cors());
-app.use(express.json());
 
 /* ===============================
-   RENDER PORT FIX
+   MIDDLEWARE
 ================================ */
-const PORT = process.env.PORT || 5000;
+app.use(cors());
+app.use(express.json());
 
 /* ===============================
    TEMP DATABASE (IN-MEMORY)
@@ -17,7 +16,7 @@ let users = [];
 let transactions = [];
 
 /* ===============================
-   ROOT ROUTE (VERY IMPORTANT)
+   ROOT CHECK (IMPORTANT)
 ================================ */
 app.get("/", (req, res) => {
   res.send("Expense Tracker Backend is running 🚀");
@@ -27,7 +26,7 @@ app.get("/", (req, res) => {
    HEALTH CHECK
 ================================ */
 app.get("/api/health", (req, res) => {
-  res.json({ status: "Backend running successfully" });
+  res.json({ status: "Backend running" });
 });
 
 /* ===============================
@@ -72,7 +71,7 @@ app.post("/api/login", (req, res) => {
 });
 
 /* ===============================
-   TRANSACTIONS
+   TRANSACTIONS CRUD
 ================================ */
 app.get("/api/transactions", (req, res) => {
   res.json(transactions);
@@ -91,8 +90,10 @@ app.delete("/api/transactions/:id", (req, res) => {
 });
 
 /* ===============================
-   START SERVER
+   PORT FIX (MOST IMPORTANT)
 ================================ */
-app.listen(PORT, () => {
+const PORT = process.env.PORT || 5000;
+
+app.listen(PORT, "0.0.0.0", () => {
   console.log(`Backend running on port ${PORT}`);
 });
