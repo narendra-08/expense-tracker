@@ -1,0 +1,312 @@
+*{
+  box-sizing:border-box;
+  margin:0;
+  padding:0;
+  font-family:system-ui, -apple-system, 'Segoe UI', Roboto, sans-serif
+}
+
+/* ===============================
+   BODY
+================================ */
+body{
+  background:#0b1220;
+  color:#e6eef8;
+  display:flex;
+  justify-content:center;
+  padding:28px
+}
+
+/* ===============================
+   APP CONTAINER (FULL WIDTH)
+================================ */
+.app{
+  width:100%;
+  max-width:1400px;      /* 🔥 WIDE DESKTOP UI */
+  background:#071027;
+  border-radius:14px;
+  padding:20px;
+  border:1px solid rgba(255,255,255,0.03)
+}
+
+h1{
+  text-align:center;
+  margin-bottom:14px
+}
+
+/* ===============================
+   COMMON UTILITIES
+================================ */
+.flex{
+  display:flex;
+  gap:12px;
+  align-items:center
+}
+
+.hidden{
+  display:none
+}
+
+.small{
+  font-size:13px;
+  color:#9fb5c8
+}
+
+/* ===============================
+   AUTH SECTION
+================================ */
+.auth-tabs{
+  display:flex;
+  background:#081227;
+  padding:4px;
+  border-radius:999px;
+  border:1px solid #102036;
+  margin-bottom:12px
+}
+
+.auth-tabs button{
+  flex:1;
+  padding:8px;
+  border-radius:999px;
+  border:none;
+  background:transparent;
+  color:#90a4b6;
+  cursor:pointer
+}
+
+.auth-tabs button.active{
+  background:#0e2740;
+  color:#fff
+}
+
+form.auth-form{
+  background:#051226;
+  padding:12px;
+  border-radius:10px;
+  border:1px solid #0f2740
+}
+
+label{
+  display:block;
+  margin-top:8px;
+  font-size:13px;
+  color:#a7bccf
+}
+
+input,select,button{
+  padding:8px;
+  border-radius:8px;
+  border:1px solid #12324a;
+  background:#061528;
+  color:#dbeefc
+}
+
+button.primary{
+  background:#2fb66b;
+  border:none;
+  color:#042018;
+  font-weight:700
+}
+
+button.ghost{
+  background:transparent;
+  border:1px solid #18445f;
+  color:#9fc6de
+}
+
+/* ===============================
+   DASHBOARD
+================================ */
+#dashboard{
+  margin-top:50px
+}
+
+.dash-header{
+  display:flex;
+  justify-content:space-between;
+  align-items:center;
+  margin-bottom:25px;
+  line-height:1.7
+}
+
+/* ===============================
+   SUMMARY CARDS
+================================ */
+.summary{
+  display:grid;
+  grid-template-columns:repeat(3,1fr);
+  gap:10px;
+  margin-bottom:12px
+}
+
+.card{
+  padding:10px;
+  border-radius:10px;
+  background:#061429;
+  border:1px solid #12324a
+}
+
+.card h3{
+  font-size:13px;
+  color:#9fb5c8
+}
+
+.card p{
+  font-size:18px;
+  margin-top:6px;
+  font-weight:700
+}
+
+/* ===============================
+   CONTROLS (FILTER + SEARCH)
+================================ */
+.top-controls{
+  display:flex;
+  justify-content:space-between;
+  align-items:center;
+  gap:12px;
+  margin-top:20px
+}
+
+.controls{
+  display:flex;
+  gap:8px;
+  flex-wrap:wrap;
+  align-items:center
+}
+
+.filters{
+  display:flex;
+  gap:8px;
+  align-items:center
+}
+
+.btn-row{
+  display:flex;
+  gap:8px
+}
+
+.export-btn{
+  background:#3b82f6;
+  color:white;
+  border:none;
+  padding:8px;
+  border-radius:8px;
+  cursor:pointer
+}
+
+/* ===============================
+   ADD TRANSACTION
+================================ */
+#add-trans{
+  margin-top:20px;
+  background-color:#0f2740;
+  border-radius:10px;
+  padding:8px
+}
+
+.add-transaction{
+  margin-bottom:12px
+}
+
+#tx-form{
+  display:grid;
+  grid-template-columns:1fr 1fr 1fr 1fr 1fr;
+  gap:8px
+}
+
+/* ===============================
+   TRANSACTIONS TABLE
+================================ */
+#showtrans{
+  margin-top:20px;
+  background-color:#1020369d;
+  padding:8px;
+  border-radius:10px
+}
+
+table{
+  width:100%;
+  border-collapse:collapse;
+  margin-top:10px
+}
+
+th,td{
+  padding:8px;
+  border-bottom:1px solid #0f2740;
+  text-align:left;
+  font-size:13px
+}
+
+.badge-income{
+  color:#6ff0a6;
+  font-weight:700
+}
+
+.badge-expense{
+  color:#ff8b8b;
+  font-weight:700
+}
+
+.delete-btn{
+  background:#f75f5f;
+  border:none;
+  padding:6px;
+  border-radius:6px;
+  color:white;
+  cursor:pointer
+}
+
+/* ===============================
+   CHARTS
+================================ */
+#chart{
+  margin-top:20px
+}
+
+.charts{
+  display:grid;
+  grid-template-columns:1.6fr 1fr; /* 🔥 balanced wide layout */
+  gap:16px;
+  margin-top:20px
+}
+
+.chart-box{
+  background:#061429;
+  padding:12px;
+  border-radius:10px;
+  border:1px solid #12324a
+}
+
+.hbar-label{
+  display:flex;
+  justify-content:space-between;
+  font-size:13px;
+  color:#9fb5c8;
+  margin-bottom:6px
+}
+
+/* ===============================
+   RESPONSIVE (MOBILE SAFE)
+================================ */
+@media(max-width:900px){
+  .summary{
+    grid-template-columns:1fr
+  }
+
+  .charts{
+    grid-template-columns:1fr
+  }
+
+  .app{
+    padding:12px
+  }
+
+  #tx-form{
+    grid-template-columns:1fr 1fr
+  }
+
+  .top-controls{
+    flex-direction:column;
+    align-items:flex-start
+  }
+}

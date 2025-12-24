@@ -1,0 +1,152 @@
+<!doctype html>
+<html lang="hi">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width,initial-scale=1"> 
+  <title>Expense Tracker — Charts Improved</title>
+
+  <!-- ❌ OLD CSS LINK HATA DIYA -->
+  <!-- <link rel="stylesheet" href="style.css"> -->
+
+  <!-- ❌ Chart.js CDN HATA DIYA -->
+  <!-- <script src="https://cdn.jsdelivr.net/npm/chart.js"></script> -->
+
+  <!-- ✅ CSS VITE SE LOAD HOGI (main.js ke through) -->
+</head>
+<body>
+
+  <div class="app">
+    <h1>Expense Tracker — Category Insights</h1>
+
+    <!-- AUTH SECTION -->
+    <div id="auth-section">
+      <div class="auth-tabs">
+        <button id="login-tab" class="active">Login</button>
+        <button id="signup-tab">Sign Up</button>
+      </div>
+
+      <form id="login-form" class="auth-form">
+        <h2>Login</h2>
+        <label>Email</label>
+        <input id="login-email" type="email" required>
+
+        <label>Password</label>
+        <input id="login-password" type="password" required>
+
+        <div class="flex">
+          <button type="submit" class="primary">Login</button>
+          <button type="button" id="demo-btn" class="ghost">Use Demo</button>
+        </div>
+        <p id="login-msg" class="small"></p>
+      </form>
+
+      <form id="signup-form" class="auth-form hidden">
+        <h2>Sign Up</h2>
+        <label>Name</label>
+        <input id="signup-name" required>
+
+        <label>Email</label>
+        <input id="signup-email" type="email" required>
+
+        <label>Password</label>
+        <input id="signup-password" type="password" required>
+        
+        <button type="submit" class="primary">Create Account</button>
+        <p id="signup-msg" class="small"></p>
+      </form>
+    </div>
+
+    <!-- DASHBOARD -->
+    <div id="dashboard" class="hidden">
+      <div class="dash-header">
+        <div>
+          <h2>Welcome, <span id="user-name"></span></h2>
+          <p class="small">Category-wise insights show where you spend most</p>
+        </div>
+        <button id="logout-btn" class="ghost">Logout</button>
+      </div>
+
+      <section class="summary">
+        <div class="card"><h3>Balance</h3><p id="balance">₹0</p></div>
+        <div class="card"><h3>Total Income</h3><p id="total-income">₹0</p></div>
+        <div class="card"><h3>Total Expense</h3><p id="total-expense">₹0</p></div>
+      </section>
+
+      <div class="top-controls">
+        <div class="controls">
+          <div class="filters">
+            <label class="small">Filter:</label>
+            <select id="month-filter">
+              <option value="all">All months</option>
+            </select>
+
+            <select id="type-filter">
+              <option value="all">All</option>
+              <option value="income">Income</option>
+              <option value="expense">Expense</option>
+            </select>
+          </div>
+
+          <div class="filters">
+            <label class="small">Search:</label>
+            <input id="search-input" placeholder="category or note" />
+          </div>
+        </div>
+
+        <div class="btn-row">
+          <button id="export-csv" class="export-btn">Export CSV</button>
+          <button id="clear-data" class="ghost">Clear My Data</button>
+        </div>
+      </div>
+
+      <section class="add-transaction" id="add-trans">
+        <h3>Add Transaction</h3><br>
+        <form id="tx-form">
+          <select id="tx-type">
+            <option value="income">Income</option>
+            <option value="expense">Expense</option>
+          </select>
+          <input id="tx-amount" type="number" placeholder="Amount" required>
+          <input id="tx-category" placeholder="Category" required>
+          <input id="tx-note" placeholder="Note">
+          <input id="tx-date" type="date" required>
+          <button type="submit" class="primary">Add</button>
+        </form>
+      </section>
+
+      <section id="showtrans" class="transactions">
+        <h3>Transactions</h3>
+        <table>
+          <thead>
+            <tr>
+              <th>Date</th><th>Type</th><th>Category</th><th>Note</th><th>Amount</th><th>Action</th>
+            </tr>
+          </thead>
+          <tbody id="tx-tbody"></tbody>
+        </table>
+      </section>
+
+      <section id="chart" class="charts">
+        <div class="chart-box">
+          <h3>Income vs Expense</h3><br>
+          <div style="height:300px">
+            <canvas id="txChart"></canvas>
+          </div>
+        </div>
+
+        <div class="chart-box">
+          <h3>Expense by Category</h3>
+          <p class="small" id="total-categories"></p>
+          <div style="height:300px">
+            <canvas id="catChart"></canvas>
+          </div>
+        </div>
+      </section>
+    </div>
+  </div>
+
+  <!-- ✅ ONLY ONE SCRIPT (VITE ENTRY) -->
+  <script type="module" src="/src/main.js"></script>
+
+</body>
+</html>
