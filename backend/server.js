@@ -2,19 +2,11 @@ import express from "express";
 import cors from "cors";
 
 const app = express();
-
-/* ===============================
-   MIDDLEWARES
-================================ */
-app.use(cors({
-  origin: "*", // frontend Netlify se allow
-  methods: ["GET", "POST", "DELETE"],
-  credentials: true
-}));
+app.use(cors());
 app.use(express.json());
 
 /* ===============================
-   PORT (IMPORTANT FOR RENDER)
+   IMPORTANT: RENDER PORT FIX
 ================================ */
 const PORT = process.env.PORT || 5000;
 
@@ -25,13 +17,17 @@ let users = [];
 let transactions = [];
 
 /* ===============================
+   ROOT CHECK (VERY IMPORTANT)
+================================ */
+app.get("/", (req, res) => {
+  res.send("Expense Tracker Backend is LIVE 🚀");
+});
+
+/* ===============================
    HEALTH CHECK
 ================================ */
 app.get("/api/health", (req, res) => {
-  res.json({
-    status: "ok",
-    message: "Backend running successfully 🚀"
-  });
+  res.json({ status: "Backend running successfully" });
 });
 
 /* ===============================
@@ -49,13 +45,7 @@ app.post("/api/signup", (req, res) => {
     return res.status(400).json({ message: "User already exists" });
   }
 
-  const user = {
-    id: Date.now(),
-    name,
-    email,
-    password
-  };
-
+  const user = { id: Date.now(), name, email, password };
   users.push(user);
 
   res.json({ message: "Signup successful" });
@@ -77,11 +67,7 @@ app.post("/api/login", (req, res) => {
 
   res.json({
     message: "Login successful",
-    user: {
-      id: user.id,
-      name: user.name,
-      email: user.email
-    }
+    user: { id: user.id, name: user.name, email: user.email }
   });
 });
 
@@ -93,10 +79,7 @@ app.get("/api/transactions", (req, res) => {
 });
 
 app.post("/api/transactions", (req, res) => {
-  const tx = {
-    id: Date.now(),
-    ...req.body
-  };
+  const tx = { id: Date.now(), ...req.body };
   transactions.push(tx);
   res.status(201).json(tx);
 });
@@ -111,5 +94,5 @@ app.delete("/api/transactions/:id", (req, res) => {
    START SERVER
 ================================ */
 app.listen(PORT, () => {
-  console.log(`✅ Backend running on port ${PORT}`);
+  console.log(`Backend running on PORT ${PORT}`);
 });
