@@ -66,6 +66,6 @@ npm run dev
 ```
 
 ## Developed By
-Narendra Prajapati|
-Neetendra Kumhar|
+Narendra Prajapati |
+Neetendra Kumhar |
 Btech AIML Student
