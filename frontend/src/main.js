@@ -38,6 +38,9 @@ const expenseEl = document.getElementById("total-expense");
 const typeFilter = document.getElementById("type-filter");
 const searchInput = document.getElementById("search-input");
 
+const exportBtn = document.getElementById("export-csv");
+const clearBtn = document.getElementById("clear-data");
+
 /* ===============================
    UI
 ================================ */
@@ -209,6 +212,54 @@ txForm.addEventListener("submit", async (e) => {
 
   txForm.reset();
   loadTransactions();
+});
+
+/* ===============================
+   EXPORT CSV
+================================ */
+exportBtn.addEventListener("click", () => {
+  if (!transactions.length) {
+    alert("No transactions to export");
+    return;
+  }
+
+  const headers = ["Type", "Category", "Note", "Amount", "Date"];
+  const rows = transactions.map(tx => [
+    tx.type,
+    tx.category,
+    tx.note || "",
+    tx.amount,
+    tx.date || ""
+  ]);
+
+  const csv =
+    headers.join(",") + "\n" +
+    rows.map(r => r.join(",")).join("\n");
+
+  const blob = new Blob([csv], { type: "text/csv" });
+  const url = URL.createObjectURL(blob);
+
+  const a = document.createElement("a");
+  a.href = url;
+  a.download = "expense_data.csv";
+  a.click();
+
+  URL.revokeObjectURL(url);
+});
+
+/* ===============================
+   CLEAR ALL DATA
+================================ */
+clearBtn.addEventListener("click", async () => {
+  const ok = confirm("Delete ALL your transactions?");
+  if (!ok) return;
+
+  await fetch(`${API_BASE}/api/transactions/clear`, {
+    method: "DELETE"
+  });
+
+  transactions = [];
+  renderUI();
 });
 
 /* ===============================
