@@ -2,6 +2,11 @@ import "./style.css";
 import { renderIncomeExpenseChart } from "./charts/incomeExpense.chart.js";
 import { renderCategoryChart } from "./charts/category.chart.js";
 
+/* ===============================
+   BACKEND CONFIG
+================================ */
+const API_BASE = "https://expense-tracker-backend-rnw6.onrender.com";
+
 let transactions = [];
 let currentUser = null;
 
@@ -38,7 +43,7 @@ const typeFilter = document.getElementById("type-filter");
 const searchInput = document.getElementById("search-input");
 
 /* ===============================
-   UI FUNCTIONS
+   UI HELPERS
 ================================ */
 function showLogin() {
   authSection.classList.remove("hidden");
@@ -61,22 +66,18 @@ function logout() {
    LOAD TRANSACTIONS
 ================================ */
 async function loadTransactions() {
-  const res = await fetch("http://localhost:5000/api/transactions");
+  const res = await fetch(`${API_BASE}/api/transactions`);
   transactions = await res.json();
   renderUI();
 }
 
 /* ===============================
-   APPLY FILTERS
+   FILTER LOGIC
 ================================ */
 function getFilteredTransactions() {
   return transactions.filter(tx => {
-    // TYPE FILTER
-    if (filters.type !== "all" && tx.type !== filters.type) {
-      return false;
-    }
+    if (filters.type !== "all" && tx.type !== filters.type) return false;
 
-    // SEARCH FILTER
     if (filters.search) {
       const q = filters.search.toLowerCase();
       const match =
@@ -84,7 +85,6 @@ function getFilteredTransactions() {
         (tx.note || "").toLowerCase().includes(q);
       if (!match) return false;
     }
-
     return true;
   });
 }
@@ -103,9 +103,8 @@ function renderUI() {
   filtered.forEach(tx => {
     const amt = Number(tx.amount);
 
-    if (tx.type === "income") {
-      income += amt;
-    } else {
+    if (tx.type === "income") income += amt;
+    else {
       expense += amt;
       categoryMap[tx.category] =
         (categoryMap[tx.category] || 0) + amt;
@@ -127,12 +126,10 @@ function renderUI() {
     tbody.appendChild(tr);
   });
 
-  /* SUMMARY */
   balanceEl.innerText = "₹" + (income - expense);
   incomeEl.innerText = "₹" + income;
   expenseEl.innerText = "₹" + expense;
 
-  /* CHARTS */
   renderIncomeExpenseChart(
     document.getElementById("txChart"),
     income,
@@ -144,7 +141,6 @@ function renderUI() {
     categoryMap
   );
 
-  /* DELETE EVENTS */
   document.querySelectorAll(".delete-btn").forEach(btn => {
     btn.addEventListener("click", () => {
       deleteTransaction(btn.dataset.id);
@@ -166,7 +162,7 @@ txForm.addEventListener("submit", async (e) => {
     date: document.getElementById("tx-date").value
   };
 
-  await fetch("http://localhost:5000/api/transactions", {
+  await fetch(`${API_BASE}/api/transactions`, {
     method: "POST",
     headers: { "Content-Type": "application/json" },
     body: JSON.stringify(newTx)
@@ -180,7 +176,7 @@ txForm.addEventListener("submit", async (e) => {
    DELETE TRANSACTION
 ================================ */
 async function deleteTransaction(id) {
-  await fetch(`http://localhost:5000/api/transactions/${id}`, {
+  await fetch(`${API_BASE}/api/transactions/${id}`, {
     method: "DELETE"
   });
   loadTransactions();
@@ -200,22 +196,54 @@ searchInput.addEventListener("input", () => {
 });
 
 /* ===============================
-   AUTH (TEMP)
+   AUTH (REAL BACKEND)
 ================================ */
-loginForm.addEventListener("submit", (e) => {
+loginForm.addEventListener("submit", async (e) => {
   e.preventDefault();
+
+  const email = loginForm.querySelector("input[type='email']").value;
+  const password = loginForm.querySelector("input[type='password']").value;
+
+  const res = await fetch(`${API_BASE}/api/login`, {
+    method: "POST",
+    headers: { "Content-Type": "application/json" },
+    body: JSON.stringify({ email, password })
+  });
+
+  if (!res.ok) {
+    alert("Invalid login");
+    return;
+  }
+
+  const data = await res.json();
+  currentUser = data.user;
+  document.getElementById("user-name").innerText = currentUser.name;
+
   showDashboard();
   loadTransactions();
 });
 
-demoBtn.addEventListener("click", () => {
-  currentUser = { name: "Demo User" };
-  document.getElementById("user-name").innerText = "Demo User";
-  showDashboard();
-  loadTransactions();
-});
+signupForm.addEventListener("submit", async (e) => {
+  e.preventDefault();
 
-logoutBtn.addEventListener("click", logout);
+  const name = signupForm.querySelector("input[type='text']").value;
+  const email = signupForm.querySelector("input[type='email']").value;
+  const password = signupForm.querySelector("input[type='password']").value;
+
+  const res = await fetch(`${API_BASE}/api/signup`, {
+    method: "POST",
+    headers: { "Content-Type": "application/json" },
+    body: JSON.stringify({ name, email, password })
+  });
+
+  if (!res.ok) {
+    alert("Signup failed");
+    return;
+  }
+
+  alert("Signup successful. Please login.");
+  signupTab.click();
+});
 
 /* ===============================
    TAB SWITCH
@@ -233,6 +261,8 @@ signupTab.addEventListener("click", () => {
   signupForm.classList.remove("hidden");
   loginForm.classList.add("hidden");
 });
+
+logoutBtn.addEventListener("click", logout);
 
 /* ===============================
    INIT
