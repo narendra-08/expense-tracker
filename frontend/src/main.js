@@ -3,19 +3,19 @@ import { renderIncomeExpenseChart } from "./charts/incomeExpense.chart.js";
 import { renderCategoryChart } from "./charts/category.chart.js";
 import { API_BASE } from "./config.js";
 
+/* ===============================
+   STATE
+================================ */
 let transactions = [];
 let currentUser = null;
 
-/* ===============================
-   FILTER STATE
-================================ */
 let filters = {
   type: "all",
   search: ""
 };
 
 /* ===============================
-   DOM ELEMENTS
+   DOM
 ================================ */
 const authSection = document.getElementById("auth-section");
 const dashboard = document.getElementById("dashboard");
@@ -39,7 +39,7 @@ const typeFilter = document.getElementById("type-filter");
 const searchInput = document.getElementById("search-input");
 
 /* ===============================
-   UI FUNCTIONS
+   UI
 ================================ */
 function showLogin() {
   authSection.classList.remove("hidden");
@@ -59,7 +59,62 @@ function logout() {
 }
 
 /* ===============================
-   LOAD TRANSACTIONS
+   AUTH – SIGNUP
+================================ */
+signupForm.addEventListener("submit", async (e) => {
+  e.preventDefault();
+
+  const name = document.getElementById("signup-name").value;
+  const email = document.getElementById("signup-email").value;
+  const password = document.getElementById("signup-password").value;
+
+  const res = await fetch(`${API_BASE}/api/signup`, {
+    method: "POST",
+    headers: { "Content-Type": "application/json" },
+    body: JSON.stringify({ name, email, password })
+  });
+
+  const data = await res.json();
+
+  if (!res.ok) {
+    alert(data.message || "Signup failed");
+    return;
+  }
+
+  alert("Signup successful! Please login.");
+  loginTab.click();
+});
+
+/* ===============================
+   AUTH – LOGIN
+================================ */
+loginForm.addEventListener("submit", async (e) => {
+  e.preventDefault();
+
+  const email = document.getElementById("login-email").value;
+  const password = document.getElementById("login-password").value;
+
+  const res = await fetch(`${API_BASE}/api/login`, {
+    method: "POST",
+    headers: { "Content-Type": "application/json" },
+    body: JSON.stringify({ email, password })
+  });
+
+  const data = await res.json();
+
+  if (!res.ok) {
+    alert(data.message || "Login failed");
+    return;
+  }
+
+  currentUser = data.user;
+  document.getElementById("user-name").innerText = currentUser.name;
+  showDashboard();
+  loadTransactions();
+});
+
+/* ===============================
+   TRANSACTIONS
 ================================ */
 async function loadTransactions() {
   const res = await fetch(`${API_BASE}/api/transactions`);
@@ -67,37 +122,55 @@ async function loadTransactions() {
   renderUI();
 }
 
+async function deleteTransaction(id) {
+  await fetch(`${API_BASE}/api/transactions/${id}`, {
+    method: "DELETE"
+  });
+  loadTransactions();
+}
+
 /* ===============================
-   RENDER UI
+   FILTER + RENDER
 ================================ */
+function getFilteredTransactions() {
+  return transactions.filter(tx => {
+    if (filters.type !== "all" && tx.type !== filters.type) return false;
+
+    if (filters.search) {
+      const q = filters.search.toLowerCase();
+      if (
+        !tx.category.toLowerCase().includes(q) &&
+        !(tx.note || "").toLowerCase().includes(q)
+      ) return false;
+    }
+    return true;
+  });
+}
+
 function renderUI() {
+  const filtered = getFilteredTransactions();
   tbody.innerHTML = "";
 
   let income = 0;
   let expense = 0;
   const categoryMap = {};
 
-  transactions.forEach(tx => {
+  filtered.forEach(tx => {
     const amt = Number(tx.amount);
-
-    if (tx.type === "income") {
-      income += amt;
-    } else {
+    if (tx.type === "income") income += amt;
+    else {
       expense += amt;
-      categoryMap[tx.category] =
-        (categoryMap[tx.category] || 0) + amt;
+      categoryMap[tx.category] = (categoryMap[tx.category] || 0) + amt;
     }
 
     const tr = document.createElement("tr");
     tr.innerHTML = `
       <td>-</td>
-      <td>${tx.type}</td>
+      <td class="${tx.type === "income" ? "badge-income" : "badge-expense"}">${tx.type}</td>
       <td>${tx.category}</td>
       <td>${tx.note || "-"}</td>
       <td>₹${amt}</td>
-      <td>
-        <button class="delete-btn" data-id="${tx.id}">Delete</button>
-      </td>
+      <td><button class="delete-btn" data-id="${tx.id}">Delete</button></td>
     `;
     tbody.appendChild(tr);
   });
@@ -106,21 +179,11 @@ function renderUI() {
   incomeEl.innerText = "₹" + income;
   expenseEl.innerText = "₹" + expense;
 
-  renderIncomeExpenseChart(
-    document.getElementById("txChart"),
-    income,
-    expense
-  );
-
-  renderCategoryChart(
-    document.getElementById("catChart"),
-    categoryMap
-  );
+  renderIncomeExpenseChart(document.getElementById("txChart"), income, expense);
+  renderCategoryChart(document.getElementById("catChart"), categoryMap);
 
   document.querySelectorAll(".delete-btn").forEach(btn => {
-    btn.addEventListener("click", () => {
-      deleteTransaction(btn.dataset.id);
-    });
+    btn.addEventListener("click", () => deleteTransaction(btn.dataset.id));
   });
 }
 
@@ -149,77 +212,20 @@ txForm.addEventListener("submit", async (e) => {
 });
 
 /* ===============================
-   DELETE TRANSACTION
+   FILTER EVENTS
 ================================ */
-async function deleteTransaction(id) {
-  await fetch(`${API_BASE}/api/transactions/${id}`, {
-    method: "DELETE"
-  });
-  loadTransactions();
-}
+typeFilter.addEventListener("change", () => {
+  filters.type = typeFilter.value;
+  renderUI();
+});
 
-/* ===============================
-   LOGIN
-================================ */
-loginForm.addEventListener("submit", async (e) => {
-  e.preventDefault();
-
-  const email = loginForm.querySelector("input[type=email]").value;
-  const password = loginForm.querySelector("input[type=password]").value;
-
-  const res = await fetch(`${API_BASE}/api/login`, {
-    method: "POST",
-    headers: { "Content-Type": "application/json" },
-    body: JSON.stringify({ email, password })
-  });
-
-  if (!res.ok) {
-    alert("Invalid login");
-    return;
-  }
-
-  currentUser = await res.json();
-  showDashboard();
-  loadTransactions();
+searchInput.addEventListener("input", () => {
+  filters.search = searchInput.value.trim();
+  renderUI();
 });
 
 /* ===============================
-   SIGNUP ✅ FIXED HERE
-================================ */
-signupForm.addEventListener("submit", async (e) => {
-  e.preventDefault();
-
-  const name = signupForm.querySelector("input[type=text]").value;
-  const email = signupForm.querySelector("input[type=email]").value;
-  const password = signupForm.querySelector("input[type=password]").value;
-
-  const res = await fetch(`${API_BASE}/api/signup`, {
-    method: "POST",
-    headers: { "Content-Type": "application/json" },
-    body: JSON.stringify({ name, email, password })
-  });
-
-  if (!res.ok) {
-    alert("Signup failed");
-    return;
-  }
-
-  alert("Signup successful, please login");
-  signupForm.reset();
-  loginTab.click();
-});
-
-/* ===============================
-   DEMO LOGIN
-================================ */
-demoBtn.addEventListener("click", () => {
-  currentUser = { name: "Demo User" };
-  showDashboard();
-  loadTransactions();
-});
-
-/* ===============================
-   TABS
+   TABS + INIT
 ================================ */
 loginTab.addEventListener("click", () => {
   loginTab.classList.add("active");
@@ -235,7 +241,13 @@ signupTab.addEventListener("click", () => {
   loginForm.classList.add("hidden");
 });
 
-/* ===============================
-   INIT
-================================ */
+demoBtn.addEventListener("click", () => {
+  currentUser = { name: "Demo User" };
+  document.getElementById("user-name").innerText = "Demo User";
+  showDashboard();
+  loadTransactions();
+});
+
+logoutBtn.addEventListener("click", logout);
+
 document.addEventListener("DOMContentLoaded", showLogin);
